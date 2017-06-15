@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="LinearLayout"
+    tools:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+
+    <ImageView
+        android:id="@+id/track_art"
+        android:layout_width="@dimen/track_artwork_size"
+        android:layout_height="@dimen/track_artwork_size"
+        android:background="@color/colorAccent"
+        />
+
+
+    <LinearLayout
+        android:id="@+id/track_linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/track_artwork_size"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:gravity="center"
+        >
+
+        <TextView
+            android:id="@+id/track_name"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            tools:text="Song Name Here"
+            />
+
+        <TextView
+            android:id="@+id/track_creator_name"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:padding="10dp"
+            tools:text="Artist Name Here"
+            />
+
+        <ImageView
+            android:id="@+id/player_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/soundcloud_logo_black"
+            />
+
+    </LinearLayout>
+
+
+</merge>

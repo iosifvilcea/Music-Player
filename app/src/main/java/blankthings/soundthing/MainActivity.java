@@ -4,18 +4,22 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,15 +27,16 @@ public class MainActivity extends AppCompatActivity {
     public static final int EXTERNAL_STORAGE_PERM_RESULT = 100;
 
     private TrackView trackView;
-
+    private Button button;
+    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        setupTrack();
+        setupViews();
     }
+
 
     @Override
     protected void onResume() {
@@ -39,8 +44,22 @@ public class MainActivity extends AppCompatActivity {
         checkPermissions();
     }
 
-    private void setupTrack() {
+
+    private void setupViews() {
         trackView = (TrackView) findViewById(R.id.track_view);
+        button = (Button) findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mediaPlayer != null) {
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.stop();
+                    } else {
+                        mediaPlayer.start();
+                    }
+                }
+            }
+        });
     }
 
 
@@ -84,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
 
-            getSupportLoaderManager().initLoader(1, null, loaderCallbacks);
+            getSupportLoaderManager().initLoader(1, null, loaderCallback);
         }
     }
 
@@ -99,55 +118,66 @@ public class MainActivity extends AppCompatActivity {
         final boolean permissionGranted =
                 grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
         if (requestCode == EXTERNAL_STORAGE_PERM_RESULT && permissionGranted) {
-            getSupportLoaderManager().initLoader(1, null, loaderCallbacks);
+            getSupportLoaderManager().initLoader(1, null, loaderCallback);
         }
     }
 
 
     private void getAlbums(final Cursor cursor) {
         if (cursor != null && cursor.getCount() != 0) {
-            while (cursor.moveToNext()) {
+            cursor.moveToNext();
 
-                String artist = "";
-                final int artistPos = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
-                if (artistPos > 0) {
-                    artist = cursor.getString(artistPos);
-
-                }
-
-                Log.e(TAG, artist);
+            String artist = "";
+            final int artistPos = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
+            if (artistPos > 0) {
+                artist = cursor.getString(artistPos);
             }
+
+            String path = "";
+            final int dataPos = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+            if (dataPos > 0) {
+                path = cursor.getString(dataPos);
+            }
+
+            String title = "";
+            final int titlePos = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
+            if (titlePos > 0) {
+                title = cursor.getString(titlePos);
+            }
+
+            final String txt = String.format("%s - %s : %s", title, artist, path);
+            Log.e(TAG, txt);
+
+            doStuffWithTheMediaPlayer(artist, title, path);
         }
 
     }
 
 
-    private LoaderManager.LoaderCallbacks loaderCallbacks =
-            new LoaderManager.LoaderCallbacks<Cursor>() {
-        @Override
-        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            String[] projection = {
-                    MediaStore.Audio.Media._ID,
-                    MediaStore.Audio.Media.ARTIST,
-            };
 
-            return new CursorLoader(
-                    MainActivity.this,
-                    MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                    projection,
-                    null,
-                    null,
-                    null);
+    private void doStuffWithTheMediaPlayer(final String artist,
+                                           final String title,
+                                           final String path) {
+
+        Toast.makeText(this, "Playing " + artist + " - " + title, Toast.LENGTH_SHORT).show();
+        mediaPlayer = new MediaPlayer();
+        try {
+
+            mediaPlayer.setDataSource(path);
+            mediaPlayer.prepare();
+
+        } catch (IOException e) {
+            Log.e(TAG, e.getLocalizedMessage());
         }
 
+        mediaPlayer.start();
+    }
+
+
+    private MediaLoaderCallback loaderCallback = new MediaLoaderCallback(this) {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             getAlbums(data);
-        }
-
-        @Override
-        public void onLoaderReset(Loader<Cursor> loader) {
-            Log.e(TAG, "Loader Reset. Do something. Probably.");
         }
     };
 }

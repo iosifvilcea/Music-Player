@@ -6,6 +6,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.widget.AdapterView;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ import java.util.List;
 public class TrackView extends RecyclerView {
 
     private TrackAdapter adapter;
-
+    private AdapterView.OnItemClickListener onItemClickListener;
 
     public TrackView(Context context) {
         super(context);
@@ -45,5 +46,21 @@ public class TrackView extends RecyclerView {
 
     public void setTracks(final List<Track> tracks) {
         adapter.setTracklist(tracks);
+    }
+
+
+    public void setOnTrackClickedListener(OnTrackClickedListener onTrackClickedListener) {
+        adapter.setOnTrackClickedListener(onTrackClickedListener);
+    }
+
+
+    /**
+     * TODO
+     *   should be moved to MVP.
+     */
+    public interface OnTrackClickedListener {
+
+        void onTrackClicked(Track track);
+
     }
 }

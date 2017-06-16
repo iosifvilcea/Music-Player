@@ -13,6 +13,7 @@ import blankthings.soundthing.R;
 
 public class TrackViewHolder extends RecyclerView.ViewHolder {
 
+    private TrackView.OnTrackClickedListener listener;
 
     private ImageView providerLogo;
     private ImageView artwork;
@@ -20,8 +21,10 @@ public class TrackViewHolder extends RecyclerView.ViewHolder {
     private TextView artist;
 
 
-    public TrackViewHolder(final View itemView) {
+    public TrackViewHolder(final View itemView, final TrackView.OnTrackClickedListener listener) {
         super(itemView);
+        this.listener = listener;
+
         providerLogo = (ImageView) itemView.findViewById(R.id.player_logo);
         artwork = (ImageView) itemView.findViewById(R.id.track_art);
         title = (TextView) itemView.findViewById(R.id.track_title);
@@ -30,6 +33,16 @@ public class TrackViewHolder extends RecyclerView.ViewHolder {
 
 
     public void bind(final Track track) {
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onTrackClicked(track);
+                }
+            }
+        });
+
+
         title.setText(track.getTitle());
         artist.setText(track.getArtist());
     }

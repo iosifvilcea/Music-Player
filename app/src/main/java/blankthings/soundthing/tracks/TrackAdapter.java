@@ -17,9 +17,15 @@ import blankthings.soundthing.R;
 public class TrackAdapter extends RecyclerView.Adapter<TrackViewHolder> {
 
     private List<Track> tracklist;
+    private TrackView.OnTrackClickedListener onTrackClickedListener;
 
     public TrackAdapter() {
         tracklist = new ArrayList<>();
+    }
+
+
+    public void setOnTrackClickedListener(TrackView.OnTrackClickedListener listener) {
+        onTrackClickedListener = listener;
     }
 
 
@@ -33,7 +39,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackViewHolder> {
     public TrackViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         final View view = inflater.inflate(R.layout.track_view, parent, false);
-        return new TrackViewHolder(view);
+        return new TrackViewHolder(view, onTrackClickedListener);
     }
 
 

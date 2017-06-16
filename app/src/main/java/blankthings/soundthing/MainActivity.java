@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -17,9 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
 
     private TrackView trackView;
     private Button button;
-    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,17 +48,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupViews() {
         trackView = (TrackView) findViewById(R.id.track_view);
+        trackView.setOnTrackClickedListener(onTrackClick);
+
         button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mediaPlayer != null) {
-                    if (mediaPlayer.isPlaying()) {
-                        mediaPlayer.stop();
-                    }
-                }
-            }
-        });
+        button.setOnClickListener(onButtonClick);
     }
 
 
@@ -105,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
         } else {
-
             getSupportLoaderManager().initLoader(1, null, loaderCallback);
         }
     }
@@ -159,30 +147,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-    private void doStuffWithTheMediaPlayer(final String artist,
-                                           final String title,
-                                           final String path) {
-
-        Toast.makeText(this, "Playing " + artist + " - " + title, Toast.LENGTH_SHORT).show();
-        mediaPlayer = new MediaPlayer();
-        try {
-
-            mediaPlayer.setDataSource(path);
-            mediaPlayer.prepare();
-
-        } catch (IOException e) {
-            Log.e(TAG, e.getLocalizedMessage());
-        }
-
-        mediaPlayer.start();
-    }
-
-
     private MediaLoaderCallback loaderCallback = new MediaLoaderCallback(this) {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             getAlbums(data);
+        }
+    };
+
+
+    private View.OnClickListener onButtonClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            // TODO: 6/16/17 service stuff here.
+        }
+    };
+
+
+    private TrackView.OnTrackClickedListener onTrackClick = new TrackView.OnTrackClickedListener() {
+        @Override
+        public void onTrackClicked(Track track) {
+            Log.e(TAG, "track clicked: " + track.getTitle());
+            // TODO: 6/16/17 start the service ? or change song if existing service is started?
         }
     };
 }

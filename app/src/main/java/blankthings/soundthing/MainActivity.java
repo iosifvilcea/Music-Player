@@ -20,6 +20,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import blankthings.soundthing.tracks.Track;
+import blankthings.soundthing.tracks.TrackView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,8 +59,6 @@ public class MainActivity extends AppCompatActivity {
                 if (mediaPlayer != null) {
                     if (mediaPlayer.isPlaying()) {
                         mediaPlayer.stop();
-                    } else {
-                        mediaPlayer.start();
                     }
                 }
             }
@@ -124,33 +127,35 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void getAlbums(final Cursor cursor) {
+        List<Track> list = new ArrayList<>();
         if (cursor != null && cursor.getCount() != 0) {
-            cursor.moveToNext();
+            while(cursor.moveToNext()) {
+                String artist = "";
+                final int artistPos = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
+                if (artistPos > 0) {
+                    artist = cursor.getString(artistPos);
+                }
 
-            String artist = "";
-            final int artistPos = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
-            if (artistPos > 0) {
-                artist = cursor.getString(artistPos);
+                String path = "";
+                final int dataPos = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+                if (dataPos > 0) {
+                    path = cursor.getString(dataPos);
+                }
+
+                String title = "";
+                final int titlePos = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
+                if (titlePos > 0) {
+                    title = cursor.getString(titlePos);
+                }
+
+                final String txt = String.format("%s - %s : %s", title, artist, path);
+                Log.e(TAG, txt);
+
+                list.add(new Track(path, title, artist));
             }
-
-            String path = "";
-            final int dataPos = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
-            if (dataPos > 0) {
-                path = cursor.getString(dataPos);
-            }
-
-            String title = "";
-            final int titlePos = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
-            if (titlePos > 0) {
-                title = cursor.getString(titlePos);
-            }
-
-            final String txt = String.format("%s - %s : %s", title, artist, path);
-            Log.e(TAG, txt);
-
-            doStuffWithTheMediaPlayer(artist, title, path);
         }
 
+        trackView.setTracks(list);
     }
 
 

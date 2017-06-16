@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:parentTag="LinearLayout"
-    tools:orientation="horizontal"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     >
@@ -25,14 +25,14 @@
         >
 
         <TextView
-            android:id="@+id/track_name"
+            android:id="@+id/track_title"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             tools:text="Song Name Here"
             />
 
         <TextView
-            android:id="@+id/track_creator_name"
+            android:id="@+id/track_artist"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:padding="10dp"
@@ -49,4 +49,4 @@
     </LinearLayout>
 
 
-</merge>
+</LinearLayout>

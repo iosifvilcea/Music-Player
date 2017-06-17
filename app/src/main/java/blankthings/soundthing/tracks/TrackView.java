@@ -6,9 +6,10 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.widget.AdapterView;
 
 import java.util.List;
+
+import blankthings.soundthing.api.Track;
 
 /**
  * Created by iosif on 6/14/17.
@@ -17,7 +18,6 @@ import java.util.List;
 public class TrackView extends RecyclerView {
 
     private TrackAdapter adapter;
-    private AdapterView.OnItemClickListener onItemClickListener;
 
     public TrackView(Context context) {
         super(context);
@@ -60,7 +60,7 @@ public class TrackView extends RecyclerView {
      */
     public interface OnTrackClickedListener {
 
-        void onTrackClicked(Track track);
+        void onTrackClicked(int trackPosition, Track track);
 
     }
 }

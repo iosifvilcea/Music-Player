@@ -10,9 +10,9 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
 
-import blankthings.soundthing.tracks.Track;
+import blankthings.soundthing.api.Track;
 
 /**
  * Created by iosif on 6/16/17.
@@ -24,16 +24,20 @@ public class PlaybackService
         MediaPlayer.OnCompletionListener {
 
     public static final String TAG = PlaybackService.class.getSimpleName();
+    public static final String PICKED_TRACK_KEY = "PICKED_TRACK_KEY";
+    public static final String TRACKS_KEY = "TRACKS_KEY";
 
     private MediaPlayer mediaPlayer;
-    private List<Track> tracklist;
-
+    private ArrayList<Track> tracklist;
     private int currentTrack;
 
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Log.e(TAG, "service created.");
+
         currentTrack = 0;
         initMediaPlayer();
     }
@@ -47,11 +51,6 @@ public class PlaybackService
         mediaPlayer.setOnPreparedListener(this);
         mediaPlayer.setOnCompletionListener(this);
         mediaPlayer.setOnErrorListener(this);
-    }
-
-
-    public void setTracklist(List<Track> list) {
-        this.tracklist = list;
     }
 
 
@@ -97,6 +96,14 @@ public class PlaybackService
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        currentTrack = intent.getIntExtra(PICKED_TRACK_KEY, 0);
+        tracklist = intent.getParcelableArrayListExtra(TRACKS_KEY);
+
+        Log.e(TAG, "onStartCommand.");
+
+        loadTrack();
+        play();
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -116,6 +123,7 @@ public class PlaybackService
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        // TODO: 6/16/17
         return false;
     }
 

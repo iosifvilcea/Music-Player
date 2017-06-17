@@ -1,26 +1,21 @@
 package blankthings.soundthing;
 
 import android.Manifest;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.Loader;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import blankthings.soundthing.tracks.Track;
+import blankthings.soundthing.api.Track;
+import blankthings.soundthing.services.PlaybackService;
 import blankthings.soundthing.tracks.TrackView;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
     public static final int EXTERNAL_STORAGE_PERM_RESULT = 100;
 
     private TrackView trackView;
+
+    private TrackLoader trackLoader;
     private Button button;
 
     @Override
@@ -56,46 +53,32 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void checkPermissions() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
+        final int permissionType = Utility.arePermissionsGranted(
+                this, Manifest.permission.READ_EXTERNAL_STORAGE, EXTERNAL_STORAGE_PERM_RESULT);
+        if (permissionType == Utility.PERMISSION_SHOW_RATIONALE) {
+            showDialog();
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
-
-
-                final TextView tv = new TextView(this);
-                tv.setText("ACCESS PLS");
-
-                final AlertDialog.Builder br = new AlertDialog.Builder(this);
-                final AlertDialog dialog = br.setView(tv)
-                        .setPositiveButton("Yuh", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .setNegativeButton("Nah", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .create();
-
-                dialog.show();
-
-            } else {
-
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        EXTERNAL_STORAGE_PERM_RESULT);
-
-            }
-
-        } else {
-            getSupportLoaderManager().initLoader(1, null, loaderCallback);
+        } else if (permissionType == Utility.PERMISSION_OK) {
+            initTrackReceiver();
         }
+    }
+
+
+    private void initTrackReceiver() {
+        if (trackLoader == null) {
+            trackLoader = new TrackLoader(this, getSupportLoaderManager());
+            trackLoader.setCallback(new TrackLoader.TracklistLoadCallback() {
+                @Override
+                public void onTracklistRetrieved(final List<Track> tracks) {
+                    trackView.setTracks(tracks);
+                }
+            });
+        }
+    }
+
+
+    private void showDialog() {
+        Toast.makeText(this, "hey. i'm a toast. i should be a dialog. thanks.", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -105,54 +88,11 @@ public class MainActivity extends AppCompatActivity {
                                            @NonNull int[] grantResults) {
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        final boolean permissionGranted =
-                grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        final boolean permissionGranted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
         if (requestCode == EXTERNAL_STORAGE_PERM_RESULT && permissionGranted) {
-            getSupportLoaderManager().initLoader(1, null, loaderCallback);
+            initTrackReceiver();
         }
     }
-
-
-    private void getAlbums(final Cursor cursor) {
-        List<Track> list = new ArrayList<>();
-        if (cursor != null && cursor.getCount() != 0) {
-            while(cursor.moveToNext()) {
-                String artist = "";
-                final int artistPos = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
-                if (artistPos > 0) {
-                    artist = cursor.getString(artistPos);
-                }
-
-                String path = "";
-                final int dataPos = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
-                if (dataPos > 0) {
-                    path = cursor.getString(dataPos);
-                }
-
-                String title = "";
-                final int titlePos = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
-                if (titlePos > 0) {
-                    title = cursor.getString(titlePos);
-                }
-
-                final String txt = String.format("%s - %s : %s", title, artist, path);
-                Log.e(TAG, txt);
-
-                list.add(new Track(path, title, artist));
-            }
-        }
-
-        trackView.setTracks(list);
-    }
-
-
-    private MediaLoaderCallback loaderCallback = new MediaLoaderCallback(this) {
-        @Override
-        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            getAlbums(data);
-        }
-    };
 
 
     private View.OnClickListener onButtonClick = new View.OnClickListener() {
@@ -165,9 +105,13 @@ public class MainActivity extends AppCompatActivity {
 
     private TrackView.OnTrackClickedListener onTrackClick = new TrackView.OnTrackClickedListener() {
         @Override
-        public void onTrackClicked(Track track) {
+        public void onTrackClicked(int trackPosition, Track track) {
             Log.e(TAG, "track clicked: " + track.getTitle());
-            // TODO: 6/16/17 start the service ? or change song if existing service is started?
+
+            final Intent intent = new Intent(MainActivity.this, PlaybackService.class);
+            intent.putExtra(PlaybackService.TRACKS_KEY, (ArrayList) trackLoader.getTracklist());
+            intent.putExtra(PlaybackService.PICKED_TRACK_KEY, trackPosition);
+            startService(intent);
         }
     };
 }

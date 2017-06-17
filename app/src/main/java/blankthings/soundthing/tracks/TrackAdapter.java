@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import blankthings.soundthing.R;
+import blankthings.soundthing.api.Track;
 
 /**
  * Created by iosif on 6/16/17.
@@ -45,7 +46,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackViewHolder> {
 
     @Override
     public void onBindViewHolder(TrackViewHolder holder, int position) {
-        holder.bind(tracklist.get(position));
+        holder.bind(position, tracklist.get(position));
     }
 
 

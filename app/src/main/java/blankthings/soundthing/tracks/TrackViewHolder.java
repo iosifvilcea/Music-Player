@@ -6,6 +6,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import blankthings.soundthing.R;
+import blankthings.soundthing.api.Track;
 
 /**
  * Created by iosif on 6/16/17.
@@ -32,12 +33,12 @@ public class TrackViewHolder extends RecyclerView.ViewHolder {
     }
 
 
-    public void bind(final Track track) {
+    public void bind(final int position, final Track track) {
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (listener != null) {
-                    listener.onTrackClicked(track);
+                    listener.onTrackClicked(position, track);
                 }
             }
         });

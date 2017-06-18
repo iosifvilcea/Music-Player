@@ -26,7 +26,9 @@ public class MainActivity extends AppCompatActivity {
     private TrackView trackView;
 
     private TrackLoader trackLoader;
-    private Button button;
+    private Button playButton;
+    private Button prevButton;
+    private Button nextButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +49,14 @@ public class MainActivity extends AppCompatActivity {
         trackView = (TrackView) findViewById(R.id.track_view);
         trackView.setOnTrackClickedListener(onTrackClick);
 
-        button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(onButtonClick);
+        prevButton = (Button) findViewById(R.id.prev_button);
+        prevButton.setOnClickListener(onButtonClick);
+
+        playButton = (Button) findViewById(R.id.play_button);
+        playButton.setOnClickListener(onButtonClick);
+
+        nextButton = (Button) findViewById(R.id.next_button);
+        nextButton.setOnClickListener(onButtonClick);
     }
 
 
@@ -98,7 +106,33 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener onButtonClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            // TODO: 6/16/17 service stuff here.
+
+            final Intent intent = new Intent(MainActivity.this, PlaybackService.class);
+            switch (v.getId()) {
+                case R.id.prev_button:
+                    intent.setAction(PlaybackService.ACTION_PREVIOUS);
+                    startService(intent);
+                    break;
+
+                case R.id.next_button:
+                    intent.setAction(PlaybackService.ACTION_NEXT);
+                    startService(intent);
+                    break;
+
+                case R.id.play_button:
+                    if (playButton.getText().toString().equals("stop")) {
+                        intent.setAction(PlaybackService.ACTION_PLAY);
+                        startService(intent);
+
+                        playButton.setText("stop");
+                    } else {
+                        intent.setAction(PlaybackService.ACTION_STOP);
+                        startService(intent);
+
+                        playButton.setText("play");
+                    }
+                    break;
+            }
         }
     };
 
@@ -109,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "track clicked: " + track.getTitle());
 
             final Intent intent = new Intent(MainActivity.this, PlaybackService.class);
+            intent.setAction(PlaybackService.ACTION_PLAY);
             intent.putExtra(PlaybackService.TRACKS_KEY, (ArrayList) trackLoader.getTracklist());
             intent.putExtra(PlaybackService.PICKED_TRACK_KEY, trackPosition);
             startService(intent);

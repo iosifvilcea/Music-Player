@@ -24,8 +24,23 @@ public class PlaybackService
         MediaPlayer.OnCompletionListener {
 
     public static final String TAG = PlaybackService.class.getSimpleName();
+
+    public static final String ACTION_PLAY = "blankthings.soundthing.action.PLAY";
+    public static final String ACTION_STOP = "blankthings.soundthing.action.STOP";
+    public static final String ACTION_PREVIOUS = "blankthings.soundthing.action.PREVIOUS";
+    public static final String ACTION_NEXT = "blankthings.soundthing.action.NEXT";
+
     public static final String PICKED_TRACK_KEY = "PICKED_TRACK_KEY";
     public static final String TRACKS_KEY = "TRACKS_KEY";
+
+    private State state;
+
+    public enum State {
+        PREPARING,
+        STARTED,
+        PAUSED,
+        STOPPED
+    }
 
     private MediaPlayer mediaPlayer;
     private ArrayList<Track> tracklist;
@@ -36,8 +51,7 @@ public class PlaybackService
     public void onCreate() {
         super.onCreate();
 
-        Log.e(TAG, "service created.");
-
+        state = State.PREPARING;
         currentTrack = 0;
         initMediaPlayer();
     }
@@ -56,8 +70,30 @@ public class PlaybackService
 
     private void play() {
         mediaPlayer.reset();
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+        try {
+            final String path = tracklist.get(currentTrack).getPath();
+            mediaPlayer.setDataSource(path);
+
+        } catch (IOException ex) {
+            Log.e(TAG, ex.getMessage());
+        }
+
         mediaPlayer.prepareAsync();
         mediaPlayer.start();
+
+        state = State.STARTED;
+    }
+
+
+    private void next() {
+
+    }
+
+
+    private void previous() {
+
     }
 
 
@@ -70,27 +106,13 @@ public class PlaybackService
     }
 
 
-    private void loadTrack() {
-        try {
-            final String path = tracklist.get(currentTrack).getPath();
-            mediaPlayer.setDataSource(path);
-
-        } catch (IOException ex) {
-            Log.e(TAG, ex.getMessage());
-        }
-    }
-
-
-    private void prepareNextSong() {
-        updateTrackIndex();
-        loadTrack();
-        play();
-    }
-
-
     public void stop() {
         mediaPlayer.stop();
+        mediaPlayer.reset();
         mediaPlayer.release();
+        mediaPlayer = null;
+
+        stopSelf();
     }
 
 
@@ -99,25 +121,24 @@ public class PlaybackService
         currentTrack = intent.getIntExtra(PICKED_TRACK_KEY, 0);
         tracklist = intent.getParcelableArrayListExtra(TRACKS_KEY);
 
-        Log.e(TAG, "onStartCommand.");
+        Log.e(TAG, "picked track " + currentTrack);
 
-        loadTrack();
-        play();
+        final String action = intent.getAction();
+        switch (action) {
+            case ACTION_PLAY: play(); break;
+            case ACTION_STOP: stop(); break;
+            case ACTION_NEXT: next(); break;
+            case ACTION_PREVIOUS: previous(); break;
+        }
 
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+        return START_NOT_STICKY;
     }
 
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        prepareNextSong();
+        // TODO: 6/18/17 do stuff.
+        Log.e(TAG, "Completed.");
     }
 
 
@@ -131,5 +152,12 @@ public class PlaybackService
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
+    }
+
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 }

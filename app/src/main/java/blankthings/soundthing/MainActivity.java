@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton prevButton;
     private ImageButton nextButton;
 
+    // TODO: 6/19/17 This is lazy. Refactor it.
     private boolean isPlaying = false;
 
     @Override
@@ -112,24 +113,26 @@ public class MainActivity extends AppCompatActivity {
             final Intent intent = new Intent(MainActivity.this, PlaybackService.class);
             switch (v.getId()) {
                 case R.id.prev_button:
+                    isPlaying = true;
                     intent.setAction(PlaybackService.ACTION_PREVIOUS);
                     startService(intent);
                     break;
 
                 case R.id.next_button:
+                    isPlaying = true;
                     intent.setAction(PlaybackService.ACTION_NEXT);
                     startService(intent);
                     break;
 
                 case R.id.play_button:
                     if (!isPlaying) {
+                        isPlaying = true;
                         intent.setAction(PlaybackService.ACTION_PLAY);
                         startService(intent);
-                        isPlaying = true;
                     } else {
+                        isPlaying = false;
                         intent.setAction(PlaybackService.ACTION_STOP);
                         startService(intent);
-                        isPlaying = false;
                     }
                     break;
             }
@@ -141,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onTrackClicked(int trackPosition, Track track) {
             Log.e(TAG, "track clicked: " + track.getTitle());
+            isPlaying = true;
 
             final Intent intent = new Intent(MainActivity.this, PlaybackService.class);
             intent.setAction(PlaybackService.ACTION_PLAY);

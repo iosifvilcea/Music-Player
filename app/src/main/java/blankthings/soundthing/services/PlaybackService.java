@@ -86,16 +86,38 @@ public class PlaybackService
 
 
     private void next() {
-        // TODO: 6/18/17 - do stuff.
+        incrementTrack();
+        play();
+    }
+
+
+    private void incrementTrack() {
+        if (currentTrack < tracklist.size()) {
+            currentTrack++;
+        } else {
+            currentTrack = 0;
+        }
+    }
+
+
+    private void decrementTrack() {
+        if (currentTrack > 0) {
+            currentTrack--;
+        } else {
+            currentTrack = tracklist.size()-1;
+        }
     }
 
 
     private void previous() {
-        // TODO: 6/18/17 - do stuff.
+        decrementTrack();
+        play();
     }
 
 
     public void stop() {
+        state = State.STOPPED;
+
         mediaPlayer.stop();
         mediaPlayer.reset();
         mediaPlayer.release();
@@ -107,17 +129,27 @@ public class PlaybackService
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        currentTrack = intent.getIntExtra(PICKED_TRACK_KEY, 0);
-        tracklist = intent.getParcelableArrayListExtra(TRACKS_KEY);
-
-        Log.e(TAG, "picked track " + currentTrack);
 
         final String action = intent.getAction();
         switch (action) {
-            case ACTION_PLAY: play(); break;
-            case ACTION_STOP: stop(); break;
-            case ACTION_NEXT: next(); break;
-            case ACTION_PREVIOUS: previous(); break;
+
+            case ACTION_PLAY:
+                currentTrack = intent.getIntExtra(PICKED_TRACK_KEY, 0);
+                tracklist = intent.getParcelableArrayListExtra(TRACKS_KEY);
+                play();
+                break;
+
+            case ACTION_STOP:
+                stop();
+                break;
+
+            case ACTION_NEXT:
+                next();
+                break;
+
+            case ACTION_PREVIOUS:
+                previous();
+                break;
         }
 
         return START_NOT_STICKY;
@@ -126,14 +158,15 @@ public class PlaybackService
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        // TODO: 6/18/17 do stuff.
-        Log.e(TAG, "Completed.");
+        Log.d(TAG, "Completed.");
+        stop();
     }
 
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        // TODO: 6/16/17
+        Log.e(TAG, "MediaPlayerError.");
+        mp.stop();
         return false;
     }
 

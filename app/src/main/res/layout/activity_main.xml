@@ -20,13 +20,16 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:padding="15dp">
+        android:padding="15dp"
+        android:background="@color/colorPrimary"
+        >
 
 
         <ImageButton
             android:id="@+id/prev_button"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
             android:src="@android:drawable/ic_media_previous"/>
 
         <ImageButton
@@ -35,6 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
+            android:background="@color/colorPrimary"
             android:src="@android:drawable/ic_media_play"
             />
 
@@ -42,6 +46,7 @@
             android:id="@+id/next_button"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
             android:src="@android:drawable/ic_media_next"
             />
 

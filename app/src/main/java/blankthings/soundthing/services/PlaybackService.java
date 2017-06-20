@@ -81,28 +81,17 @@ public class PlaybackService
         }
 
         mediaPlayer.prepareAsync();
-        mediaPlayer.start();
-
         state = State.STARTED;
     }
 
 
     private void next() {
-
+        // TODO: 6/18/17 - do stuff.
     }
 
 
     private void previous() {
-
-    }
-
-
-    private void updateTrackIndex() {
-        if (currentTrack < tracklist.size()) {
-            currentTrack++;
-        } else {
-            currentTrack = 0;
-        }
+        // TODO: 6/18/17 - do stuff.
     }
 
 

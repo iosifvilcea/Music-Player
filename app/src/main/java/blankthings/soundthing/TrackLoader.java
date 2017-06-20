@@ -15,6 +15,8 @@ import java.util.List;
 import blankthings.soundthing.api.Track;
 
 /**
+ * Loads tracks found in external storage.
+ *
  * Created by iosif on 6/16/17.
  */
 
@@ -63,7 +65,8 @@ public class TrackLoader implements LoaderManager.LoaderCallbacks<Cursor> {
                         cursor.getString(pathColumn),
                         cursor.getString(titleColumn),
                         cursor.getString(artistColumn),
-                        cursor.getString(albumColumn));
+                        cursor.getString(albumColumn)
+                );
 
                 tracklist.add(track);
             }

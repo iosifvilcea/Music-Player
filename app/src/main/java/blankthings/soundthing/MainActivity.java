@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -26,9 +26,11 @@ public class MainActivity extends AppCompatActivity {
     private TrackView trackView;
 
     private TrackLoader trackLoader;
-    private Button playButton;
-    private Button prevButton;
-    private Button nextButton;
+    private ImageButton playButton;
+    private ImageButton prevButton;
+    private ImageButton nextButton;
+
+    private boolean isPlaying = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +51,13 @@ public class MainActivity extends AppCompatActivity {
         trackView = (TrackView) findViewById(R.id.track_view);
         trackView.setOnTrackClickedListener(onTrackClick);
 
-        prevButton = (Button) findViewById(R.id.prev_button);
+        prevButton = (ImageButton) findViewById(R.id.prev_button);
         prevButton.setOnClickListener(onButtonClick);
 
-        playButton = (Button) findViewById(R.id.play_button);
+        playButton = (ImageButton) findViewById(R.id.play_button);
         playButton.setOnClickListener(onButtonClick);
 
-        nextButton = (Button) findViewById(R.id.next_button);
+        nextButton = (ImageButton) findViewById(R.id.next_button);
         nextButton.setOnClickListener(onButtonClick);
     }
 
@@ -120,16 +122,14 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
                 case R.id.play_button:
-                    if (playButton.getText().toString().equals("stop")) {
+                    if (!isPlaying) {
                         intent.setAction(PlaybackService.ACTION_PLAY);
                         startService(intent);
-
-                        playButton.setText("stop");
+                        isPlaying = true;
                     } else {
                         intent.setAction(PlaybackService.ACTION_STOP);
                         startService(intent);
-
-                        playButton.setText("play");
+                        isPlaying = false;
                     }
                     break;
             }
